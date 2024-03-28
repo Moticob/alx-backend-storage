@@ -30,13 +30,13 @@ def data_cacher(method: Callable) -> Callable:
         Returns:
             str: The requested data.
         """
-        redis_store.incr(f"count:{url}")
         result = redis_store.get(f"result:{url}")
         if result:
+            redis_store.incr(f"count:{url}")
             return result.decode("utf-8")
         result = method(url)
-        redis_store.set(f"count:{url}", 0)
         redis_store.setex(f"result:{url}", 10, result)
+        redis_store.incr(f"count:{url}")
         return result
 
     return invoker
